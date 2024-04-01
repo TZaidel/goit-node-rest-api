@@ -77,7 +77,7 @@ export const updateContact =async (req, res) => {
     res.json(updatedContact)
   }
   catch (error) {
-    console.log(error)
+    next(error)
   }
 };
 
