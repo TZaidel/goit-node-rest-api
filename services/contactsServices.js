@@ -1,22 +1,23 @@
 import fs from 'fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url';
-import {nanoid} from 'nanoid'
+import { nanoid } from 'nanoid'
+import {Contact} from '../models/contactModel.js'
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const contactsPath = path.join(__dirname, '../db/contacts.json')
 
+
 async function listContacts() {
-  const data = await fs.readFile(contactsPath)
-  const arr = data.toString()
-  return JSON.parse(arr)
+  const contacts = await Contact.find()
+  return contacts 
 }
 
 async function getContactById(contactId) {
   const contatcs = await listContacts()
-  const result = contatcs.find(item => item.id === contactId)
+  const result = Contact.findById(contactId)
   return result || null
 }
 
@@ -45,14 +46,11 @@ async function updContact(contactId, data) {
   return contacts[index]
 }
 
+
+
 async function addContact(data) {
-  const contacts = await listContacts()
-  const newContact = {
-    id: nanoid(),
-    ...data
-  }
-  contacts.push(newContact)
-  await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2))
+  const newContact = new Contact(data)
+  await newContact.save()
   return newContact
 }
 
