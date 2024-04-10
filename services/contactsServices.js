@@ -1,14 +1,4 @@
-import fs from 'fs/promises'
-import path from 'path'
-import { fileURLToPath } from 'url';
-import { nanoid } from 'nanoid'
 import {Contact} from '../models/contactModel.js'
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const contactsPath = path.join(__dirname, '../db/contacts.json')
-
 
 async function listContacts() {
   const contacts = await Contact.find()
@@ -22,43 +12,32 @@ async function getContactById(contactId) {
 }
 
 async function removeContact(contactId) {
-  const contacts = await listContacts()
-  const index = contacts.findIndex(item => item.id === contactId)
-  if (index === -1) {
-    return null
-  }
-  const [result] = contacts.splice(index, 1)
-  await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2))
-  return result
+  const removedContact = await Contact.findByIdAndDelete(contactId)
+  return removedContact
 }
 
 async function updContact(contactId, data) {
-  const contacts = await listContacts()
-  const index = contacts.findIndex(item => item.id === contactId)
-  if (index === -1) {
-    return null
-  }
-  contacts[index] = {
-    id: contactId,
-    ...data
-  }
-    await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2))
-  return contacts[index]
+  const result = await Contact.findByIdAndUpdate(contactId, data, { new: true })
+  return result
 }
 
+async function updStatusContact(contactId, data) {
+  const { favorite } = data
+  const result = await Contact.findByIdAndUpdate(contactId, {favorite}, { new: true })
+  return result
+}
 
 
 async function addContact(data) {
-  const newContact = new Contact(data)
-  await newContact.save()
+  const newContact = await Contact.create(data)
   return newContact
 }
-
 
 export {
   listContacts,
   getContactById,
   removeContact,
   addContact,
-  updContact
+  updContact,
+  updStatusContact
 }

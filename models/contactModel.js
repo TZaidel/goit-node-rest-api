@@ -15,6 +15,10 @@ const contactSchema = new Schema ({
       type: Boolean,
       default: false,
     },
+},
+  {
+    timestamps: true,
+    versionKey: false
 })
   
-export const Contact = model('Contact', contactSchema)
+export const Contact = model('contact', contactSchema)
