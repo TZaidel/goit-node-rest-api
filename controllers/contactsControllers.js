@@ -36,6 +36,11 @@ export const createContact = catchAsync(async (req, res) => {
 
 export const updateContact = catchAsync(async (req, res) => {
   const { id } = req.params
+
+  if (Object.keys(req.body).length === 0) {
+    throw HttpError(400, "Body is required");
+  }
+
   const result = await updContact(id, req.body)
   if (!result)  throw HttpError(404, "Not found")
   res.json(result)
@@ -44,6 +49,11 @@ export const updateContact = catchAsync(async (req, res) => {
 export const updateStatus = catchAsync(async (req, res) => {
   const { id } = req.params
   const { favorite } = req.body
+
+  if (favorite === undefined) {
+    throw HttpError(400, "Body is required");
+  }
+
   const updatedContact = await updStatusContact(id, { favorite })
   if (!updatedContact) throw HttpError(404, "Not found")
   res.status(200).json(updatedContact)
