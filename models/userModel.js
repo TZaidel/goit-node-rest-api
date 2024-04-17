@@ -19,7 +19,11 @@ const userSchema = new Schema ({
     type: String,
     default: null,
   },
-}
+},
+  {
+    timestamps: true,
+    versionKey: false
+  }
 )
   
 export const User = model('user', userSchema)
