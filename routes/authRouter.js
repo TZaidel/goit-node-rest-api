@@ -9,7 +9,7 @@ import authenticate from '../helpers/authenticate.js'
 
 const authRouter = express.Router()
 
-authRouter.post('/current', authenticate, getCurrentUser)
+authRouter.get('/current', authenticate, getCurrentUser)
 
 authRouter.post('/register', validateBody(userSchema), createUser)
 
