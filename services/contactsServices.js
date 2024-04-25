@@ -32,8 +32,9 @@ async function updStatusContact(req, contactId, data) {
 }
 
 
-async function addContact(data) {
-  const newContact = await Contact.create(data)
+async function addContact(...args) {
+  const newContact = new Contact(...args)
+  await newContact.save()
   return newContact
 }
 
