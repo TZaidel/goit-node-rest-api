@@ -1,10 +1,10 @@
 import express from 'express'
-import { createUser, loginUser, getCurrentUser, logoutUser } from '../controllers/authControllers.js'
+import { createUser, loginUser, getCurrentUser, logoutUser, updateAvatar } from '../controllers/authControllers.js'
 
 import { userSchema } from '../schemas/usersSchemas.js'
 
 import validateBody from '../helpers/validateBody.js'
-
+import upload from '../helpers/upload.js'
 import authenticate from '../helpers/authenticate.js'
 
 const authRouter = express.Router()
@@ -16,5 +16,7 @@ authRouter.post('/register', validateBody(userSchema), createUser)
 authRouter.post('/login', validateBody(userSchema), loginUser)
 
 authRouter.post('/logout', authenticate, logoutUser)
+
+authRouter.patch('/avatars', authenticate, upload.single('avatar'), updateAvatar)
 
 export default authRouter
