@@ -13,8 +13,6 @@ const app = express();
 
 const { DB_HOST } = process.env
 
-// mongoose.set('strictQuery', true)
-
 mongoose.connect(DB_HOST)
   .then(() => {
     app.listen(3000, () => {
@@ -29,6 +27,7 @@ mongoose.connect(DB_HOST)
 app.use(morgan("tiny"));
 app.use(cors());
 app.use(express.json());
+app.use(express.static("public"))
 
 app.use("/api/contacts", contactsRouter);
 app.use("/api/users", authRouter);
