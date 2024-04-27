@@ -11,6 +11,9 @@ import {
 import  validateBody  from '../helpers/validateBody.js'
 import isValidId from '../helpers/isValidId.js'
 
+import authenticate from '../helpers/authenticate.js'
+
+
 import {
   createContactSchema,
   updateContactSchema,
@@ -20,16 +23,16 @@ import {
 
 const contactsRouter = express.Router();
 
-contactsRouter.get("/", getAllContacts);
+contactsRouter.get("/", authenticate, getAllContacts);
 
-contactsRouter.get("/:id", isValidId, getOneContact);
+contactsRouter.get("/:id", authenticate, isValidId, getOneContact);
 
-contactsRouter.post("/", validateBody(createContactSchema), createContact);
+contactsRouter.post("/", authenticate, validateBody(createContactSchema), createContact);
 
-contactsRouter.put("/:id", isValidId, validateBody(updateContactSchema), updateContact);
+contactsRouter.put("/:id", authenticate, isValidId, validateBody(updateContactSchema), updateContact);
 
-contactsRouter.patch("/:id/favorite", isValidId, validateBody(updateStatusSchema), updateStatus);
+contactsRouter.patch("/:id/favorite", authenticate, isValidId, validateBody(updateStatusSchema), updateStatus);
 
-contactsRouter.delete("/:id", isValidId, deleteContact);
+contactsRouter.delete("/:id", authenticate, isValidId, deleteContact);
 
 export default contactsRouter;

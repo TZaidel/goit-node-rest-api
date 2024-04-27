@@ -1,35 +1,40 @@
 import {Contact} from '../models/contactModel.js'
 
-async function listContacts() {
-  const contacts = await Contact.find()
+async function listContacts(id) {
+  const contacts = await Contact.find({owner: id})
   return contacts 
 }
 
-async function getContactById(contactId) {
+async function getContactById(contactId, req) {
+  const {_id: owner} = req.user
   const contatcs = await listContacts()
-  const result = Contact.findById(contactId)
+  const result = Contact.findOne({_id: contactId, owner})
   return result || null
 }
 
-async function removeContact(contactId) {
-  const removedContact = await Contact.findByIdAndDelete(contactId)
+async function removeContact(contactId, req) {
+  const {_id: owner} = req.user
+  const removedContact = await Contact.findOneAndDelete({_id: contactId, owner})
   return removedContact
 }
 
-async function updContact(contactId, data) {
-  const result = await Contact.findByIdAndUpdate(contactId, data, { new: true })
+async function updContact(req, contactId, data) {
+  const {_id: owner} = req.user
+  const result = await Contact.findOneAndUpdate({_id: contactId, owner}, data, { new: true })
   return result
 }
 
-async function updStatusContact(contactId, data) {
+async function updStatusContact(req, contactId, data) {
+  const {_id: owner} = req.user
   const { favorite } = data
-  const result = await Contact.findByIdAndUpdate(contactId, {favorite}, { new: true })
+  const result = await Contact.findOneAndUpdate({_id: contactId, owner}, {favorite}, { new: true })
   return result
 }
 
 
-async function addContact(data) {
-  const newContact = await Contact.create(data)
+async function addContact(...args) {
+  const newContact = new Contact(...args)
+  await newContact.save()
   return newContact
 }
 
