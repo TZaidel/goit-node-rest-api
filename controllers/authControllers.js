@@ -97,3 +97,11 @@ export const updateAvatar = catchAsync(async (req, res) => {
     avatarURL
   })
 })
+
+export const verifyEmail = catchAsync(async(req, res) => {
+  
+})
+
+export const resendVerifyEmail = catchAsync(async(req, res) => {
+  
+})
