@@ -81,12 +81,12 @@ export const resendVerifyEmail = catchAsync(async (req, res) => {
   }
   const verifEmail = {
     to: email,
-    subject: 'Verifay email',
-    html: `<a target="_blank" href="${host_base_url}/users/verify/${user.verificationToken}">Click verifay email</a>`,
+    subject: 'Verify email',
+    html: `<a target="_blank" href="${host_base_url}/users/verify/${user.verificationToken}">Click verify email</a>`,
   };
   await sendEmail(verifEmail);
   res.json({
-    message: 'Verify email send success',
+    message: 'Verification successful',
   });
 });
 
