@@ -6,14 +6,16 @@ import path from "path"
 import { fileURLToPath } from 'url'
 import fs from 'fs/promises'
 import Jimp from 'jimp'
+import {nanoid} from 'nanoid'
 
 import { catchAsync } from '../helpers/catchAsync.js';
 import HttpError from '../helpers/HttpError.js';
+import {sendMail} from '../helpers/sendMail.js'
 import { User } from '../models/userModel.js';
 
 dotenv.config();
 
-const secretKey = process.env.SECRET_KEY;
+const { SECRET_KEY, BASE_URL } = process.env
 
 
 const __filename = fileURLToPath(import.meta.url)
@@ -31,7 +33,18 @@ export const createUser = catchAsync(async (req, res) => {
 
   const hashPassword = await bcrypt.hash(password, 10);
   const avatarURL = gravatar.url(email)
-  const newUser = await User.create({ ...req.body, password: hashPassword, avatarURL });
+  const verificationToken = nanoid()
+
+  const newUser = await User.create({ ...req.body, password: hashPassword, avatarURL, verificationToken });
+
+  const verifyEmail = {
+    from: 'randomnessrandom@meta.ua',
+    to: email,
+    subject: "Verify email",
+    html: `<a target="_blank" href="${BASE_URL}/users/verify/${verificationToken}">Click verify email</a>`,
+  }
+
+  await sendMail(verifyEmail)
 
   res.status(201).json({
     email: newUser.email,
@@ -39,6 +52,45 @@ export const createUser = catchAsync(async (req, res) => {
     avatarUrl: newUser.avatarUrl
   });
 });
+
+
+export const verifyEmail = catchAsync(async (req, res) => {
+  const { verificationToken } = req.params;
+  const user = await User.findOne({ verificationToken });
+  if (!user) {
+    throw HttpError(404, 'Invalid or expired verification token');
+  }
+  if (user.verify) {
+    throw HttpError(409, 'Email already verified');
+  }
+  await User.findByIdAndUpdate(user._id, { verify: true, verificationToken: null });
+
+  res.status(200).json({
+    message: 'Email verification successful',
+  });
+});
+
+export const resendVerifyEmail = catchAsync(async (req, res) => {
+  const { email } = req.body;
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw HttpError(400, 'missing required field email');
+  }
+  if (user.verify) {
+    throw HttpError(400, 'Verification has already been passed');
+  }
+  const verifEmail = {
+    to: email,
+    subject: 'Verify email',
+    html: `<a target="_blank" href="${host_base_url}/users/verify/${user.verificationToken}">Click verify email</a>`,
+  };
+  await sendEmail(verifEmail);
+  res.json({
+    message: 'Verification successful',
+  });
+});
+
+
 
 export const loginUser = catchAsync(async (req, res) => {
   const { email, password } = req.body;
@@ -54,7 +106,7 @@ export const loginUser = catchAsync(async (req, res) => {
     id: user._id,
   };
 
-  const token = jwt.sign(payload, secretKey, { expiresIn: '23h' });
+  const token = jwt.sign(payload, SECRET_KEY, { expiresIn: '23h' });
   await User.findOneAndUpdate(user._id, { token });
   res.json({
     token,
